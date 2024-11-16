@@ -1,8 +1,8 @@
-#include <iostream>
-#include "keyEventManager/getKeyEvent.h"
+#include <keyEvent.h>
 
-int main()
-{
+#include <iostream>
+
+int main() {
     std::cout << "Starting key event listener..." << std::endl;
 
     // Start capturing key events

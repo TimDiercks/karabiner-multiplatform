@@ -1,36 +1,77 @@
-#include "hotKeyManager.h"
+#include <hotKeyManager.h>
+#include <keyCodes.h>
+#include <keySender.h>
 
-// using Shortcut = std::vector<char>;
+#include <iostream>
+#include <vector>
 
-// std::unordered_map<Shortcut, std::function<void()>,
-//                    std::hash<std::string>, std::equal_to<>>
-//     shortcutActions;
+static std::vector<int> pressedKeys;
+bool hotKeyActive = false;
 
-// void registerShortcut(const Shortcut &shortcut, std::function<void()> action)
-// {
-//     shortcutActions[shortcut] = action;
-// }
+void addActiveKey(int keyCode) {
+    if (std::find(pressedKeys.begin(), pressedKeys.end(), keyCode) ==
+        pressedKeys.end())
+        pressedKeys.push_back(keyCode);
+}
 
-// void setupShortcuts()
-// {
-//     // Define some example shortcuts
-//     registerShortcut({'o', 'a'}, []() { // SUPER + O + A
-//         std::cout << "SUPER + O + A Shortcut Activated!" << std::endl;
-//     });
-//     registerShortcut({'a', 'o'}, []() { // SUPER + A + O (different order)
-//         std::cout << "SUPER + A + O Shortcut Activated!" << std::endl;
-//     });
-//     // Add more shortcuts as needed
-// }
+void removeActiveKey(int keyCode) {
+    pressedKeys.erase(
+        std::remove(pressedKeys.begin(), pressedKeys.end(), keyCode),
+        pressedKeys.end());
+}
 
-// void checkShortcuts()
-// {
-//     for (const auto &[shortcut, action] : shortcutActions)
-//     {
-//         if (shortcut == pressedKeys) // If the order matches this shortcut
-//         {
-//             action(); // Execute the associated action
-//             break;    // Exit loop to prevent multiple matches (optional)
-//         }
-//     }
-// }
+bool handleKeyEvent(int keyCode, bool isPressed) {
+    int size = pressedKeys.size();
+    if (hotKeyActive) {
+        return false;
+    }
+
+    if (isPressed) {
+        if (size > 0 || keyCode == KEY_CAPS_LOCK) {
+            addActiveKey(keyCode);
+        }
+        // Check for hotkey
+        if (size == 2) {
+            if (pressedKeys[1] == 'V') {
+                if (keyCode == 'H') {
+                    hotKeyActive = true;
+                    sendKeyList({KEY_LEFT}, false);
+                    removeActiveKey(keyCode);
+                    hotKeyActive = false;
+                } else if (keyCode == 'J') {
+                    hotKeyActive = true;
+                    sendKeyList({KEY_DOWN}, false);
+                    hotKeyActive = false;
+                    removeActiveKey(keyCode);
+                } else if (keyCode == 'K') {
+                    hotKeyActive = true;
+                    sendKeyList({KEY_UP}, false);
+                    removeActiveKey(keyCode);
+                    hotKeyActive = false;
+                } else if (keyCode == 'L') {
+                    hotKeyActive = true;
+                    sendKeyList({KEY_RIGHT}, false);
+                    removeActiveKey(keyCode);
+                    hotKeyActive = false;
+                }
+
+                return true;
+            }
+        }
+        if (pressedKeys.size() > 0) {
+            return true;
+        }
+    } else {
+        if (keyCode == KEY_CAPS_LOCK) {
+            pressedKeys.clear();
+            if (size == 1) {
+                sendKeyList({KEY_ESCAPE}, false);
+            }
+            return true;
+        } else {
+            removeActiveKey(keyCode);
+        }
+    }
+
+    return false;
+}
