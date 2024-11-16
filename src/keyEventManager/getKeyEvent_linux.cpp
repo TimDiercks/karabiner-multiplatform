@@ -1,4 +1,5 @@
 #ifdef __linux__
+// NOT TESTED
 #include "getKeyEvent.h"
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
