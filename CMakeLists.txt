@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.10)
+project(KeyEventListener)
+
+set(CMAKE_CXX_STANDARD 17)
+set(COMMON_SOURCES src/main.cpp src/hotKeyManager/hotKeyManager.cpp)
+# Add source files based on the operating system
+if (WIN32)
+    add_executable(KeyEventListener ${COMMON_SOURCES} src/keyEventManager/getKeyEvent_windows.cpp)
+elseif (APPLE)
+    add_executable(KeyEventListener ${COMMON_SOURCES} src/keyEventManager/getKeyEvent_macos.cpp)
+    target_link_libraries(KeyEventListener "-framework ApplicationServices")
+elseif (UNIX)
+    add_executable(KeyEventListener ${COMMON_SOURCES} src/keyEventManager/getKeyEvent_linux.cpp)
+    target_link_libraries(KeyEventListener X11)
+endif()
